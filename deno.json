@@ -1,0 +1,9 @@
+{
+  "dev-imports": {
+    "@fleek-platform/cli": "npm:@fleek-platform/cli@^2.10.1"
+  },
+  "tasks": {
+    "init": "fleek functions create -n pastebin",
+    "deploy": "fleek functions deploy -n pastebin -p index.js --noBundle"
+  }
+}
