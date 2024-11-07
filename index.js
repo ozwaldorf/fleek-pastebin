@@ -5,24 +5,26 @@ import { Buffer } from 'node:buffer';
 const htob = s => new Uint8Array([...s.matchAll(/../g)].map(m => parseInt(m[0], 16)));
 const btoh = b => [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, "0")).join("");
 
-const host = "paste.functions.on-fleek.app";
+export async function main({ path, method, body, headers }) {
+  // Parse hostname url from the forwarded host, or fallback to a direct network link
+  const host = headers["x-forwarded-host"]
+    || `https://fleek-test.network/services/1/${location.protocol.replace(':', '')}/${location.host}`;
 
-export async function main({ path, method, body }) {
   switch (method) {
-    case "GET": return await handleGet(path);
-    case "PUT": return await handlePut(body);
+    case "GET": return await handleGet(host, path);
+    case "PUT": return await handlePut(host, body);
   }
 }
 
-function handleGet(path) {
+function handleGet(host, path) {
   if (path == "" || path == "/") {
-    return handleUsage()
+    return handleUsage(host)
   } else {
     return handleContent(path)
   }
 }
 
-function handleUsage() {
+function handleUsage(host) {
   return `\
 PASTEBIN(1)             User Commands             PASTEBIN(1)
 
@@ -71,7 +73,7 @@ async function handleContent(path) {
   return new Uint8Array(flatArray);
 }
 
-async function handlePut(body) {
+async function handlePut(host, body) {
   // normalize body into byte array
   let bytes;
   if (ArrayBuffer.isView(body)) {
